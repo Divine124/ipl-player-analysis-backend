@@ -35,7 +35,7 @@ grok:
 cricapi:
   api:
     key: ${CRICAPI_KEY}
-    base-url: https://api.cricapi.com/v1
+    url: https://api.cricketdata.org/v1
 
 management:
   endpoints:
