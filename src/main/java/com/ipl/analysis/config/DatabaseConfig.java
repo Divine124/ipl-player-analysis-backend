@@ -18,7 +18,7 @@ public class DatabaseConfig {
 
     @Bean
     public DataSource dataSource() throws URISyntaxException {
-        if (databaseUrl == null || !databaseUrl.startsWith("postgres://")) {
+        if (databaseUrl == null || (!databaseUrl.startsWith("postgres://") && !databaseUrl.startsWith("postgresql://"))) {
             // Fallback to normal behavior if missing or not a Render URL
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(databaseUrl);
