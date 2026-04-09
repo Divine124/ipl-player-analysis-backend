@@ -2,8 +2,7 @@ spring:
   application:
     name: ipl-player-analysis-backend
   datasource:
-    url: ${DATABASE_URL}
-    driver-class-name: org.postgresql.Driver
+    # URL is dynamically handled by DatabaseConfig to support Render.com's format
   jpa:
     hibernate:
       ddl-auto: validate
