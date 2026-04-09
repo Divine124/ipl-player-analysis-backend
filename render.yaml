@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: ipl-player-analysis-backend
+    env: docker
+    plan: free
+    region: singapore
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ipl-db
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: ipl-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: ipl-redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          type: redis
+          name: ipl-redis
+          property: password
+      - key: CLAUDE_API_KEY
+        sync: false
+      - key: CRICAPI_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+
+databases:
+  - name: ipl-db
+    plan: free
+
+redis:
+  - name: ipl-redis
+    plan: free
+    ipAllowList: [] # empty allows all
