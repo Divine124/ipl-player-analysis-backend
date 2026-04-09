@@ -12,14 +12,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ClaudeAiService {
+public class GrokAiService {
 
     private final WebClient.Builder webClientBuilder;
     private final SimpMessagingTemplate messagingTemplate;
@@ -27,13 +27,13 @@ public class ClaudeAiService {
     private final PlayerRepository playerRepository;
     private final ObjectMapper objectMapper;
 
-    @Value("${claude.api.key}")
+    @Value("${grok.api.key}")
     private String apiKey;
 
-    @Value("${claude.api.url}")
+    @Value("${grok.api.url}")
     private String apiUrl;
 
-    @Value("${claude.api.model}")
+    @Value("${grok.api.model}")
     private String model;
 
     public void analysePlayerPerformance(Long playerId, String sessionId) {
@@ -57,44 +57,49 @@ public class ClaudeAiService {
                 player.getStats().getStrikeRate()
         );
 
-        streamClaudeResponse(prompt, sessionId, player);
+        streamGrokResponse(prompt, sessionId, player);
     }
 
-    private void streamClaudeResponse(String prompt, String sessionId, Player player) {
+    private void streamGrokResponse(String prompt, String sessionId, Player player) {
         StringBuilder fullReport = new StringBuilder();
 
-        WebClient webClient = webClientBuilder.baseUrl(apiUrl).build();
+        WebClient webClient = webClientBuilder.build();
 
         Map<String, Object> requestBody = Map.of(
                 "model", model,
-                "max_tokens", 1024,
-                "messages", new Object[]{
+                "messages", List.of(
+                        Map.of("role", "system", "content", "You are a helpful cricket analyst."),
                         Map.of("role", "user", "content", prompt)
-                },
+                ),
                 "stream", true
         );
 
         webClient.post()
-                .header("x-api-key", apiKey)
-                .header("anthropic-version", "2023-06-01")
+                .uri(apiUrl)
+                .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToFlux(String.class)
-                .filter(chunk -> !chunk.equals("[DONE]"))
                 .doOnNext(chunk -> {
                     try {
+                        if (chunk.equals("[DONE]")) return;
                         if (chunk.startsWith("data: ")) {
                             String jsonData = chunk.substring(6).trim();
+                            if (jsonData.equals("[DONE]")) return;
+                            
                             JsonNode node = objectMapper.readTree(jsonData);
-                            if (node.has("delta") && node.get("delta").has("text")) {
-                                String text = node.get("delta").get("text").asText();
-                                fullReport.append(text);
-                                messagingTemplate.convertAndSend("/topic/analysis/" + sessionId, text);
+                            if (node.has("choices") && node.get("choices").get(0).has("delta")) {
+                                JsonNode delta = node.get("choices").get(0).get("delta");
+                                if (delta.has("content")) {
+                                    String text = delta.get("content").asText();
+                                    fullReport.append(text);
+                                    messagingTemplate.convertAndSend("/topic/analysis/" + sessionId, text);
+                                }
                             }
                         }
                     } catch (Exception e) {
-                        log.error("Error parsing Claude response chunk: {}", e.getMessage());
+                        log.debug("Chunk processing skipped or failed: {}", e.getMessage());
                     }
                 })
                 .doOnComplete(() -> {
@@ -103,7 +108,7 @@ public class ClaudeAiService {
                             .content(fullReport.toString())
                             .build();
                     reportRepository.save(report);
-                    log.info("Analysis report saved for player: {}", player.getName());
+                    log.info("Analysis report (Grok) saved for player: {}", player.getName());
                 })
                 .subscribe();
     }

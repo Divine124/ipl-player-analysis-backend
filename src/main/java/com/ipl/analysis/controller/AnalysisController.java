@@ -4,7 +4,7 @@ import com.ipl.analysis.dto.AnalysisRequestDto;
 import com.ipl.analysis.dto.AnalysisResponseDto;
 import com.ipl.analysis.model.AnalysisReport;
 import com.ipl.analysis.repository.AnalysisReportRepository;
-import com.ipl.analysis.service.ClaudeAiService;
+import com.ipl.analysis.service.GrokAiService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Analysis", description = "Endpoints for AI-powered player analysis")
 public class AnalysisController {
 
-    private final ClaudeAiService claudeAiService;
+    private final GrokAiService grokAiService;
     private final AnalysisReportRepository reportRepository;
 
     @PostMapping("/player/{id}")
@@ -26,7 +26,7 @@ public class AnalysisController {
             @ApiResponse(responseCode = "202", description = "Analysis triggered")
     })
     public ResponseEntity<String> analysePlayer(@PathVariable Long id, @RequestParam String sessionId) {
-        claudeAiService.analysePlayerPerformance(id, sessionId);
+        grokAiService.analysePlayerPerformance(id, sessionId);
         return ResponseEntity.accepted().body("Analysis triggered. Results will be streamed via WebSocket.");
     }
 

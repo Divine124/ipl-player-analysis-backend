@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class FantasyService {
 
     private final PlayerRepository playerRepository;
-    private final ClaudeAiService claudeAiService;
+    private final GrokAiService grokAiService;
 
     public FantasyResponseDto recommendXI(FantasyRequestDto request) {
         List<Player> players = playerRepository.findAllById(

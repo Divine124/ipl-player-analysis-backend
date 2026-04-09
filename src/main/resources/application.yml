@@ -26,11 +26,11 @@ spring:
 server:
   port: ${PORT:8080}
 
-claude:
+grok:
   api:
-    key: ${CLAUDE_API_KEY}
-    url: https://api.anthropic.com/v1/messages
-    model: claude-sonnet-4-5
+    key: ${GROK_API_KEY}
+    url: https://api.x.ai/v1/chat/completions
+    model: grok-beta
 
 cricapi:
   api:
