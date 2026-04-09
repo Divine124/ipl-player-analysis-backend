@@ -11,16 +11,11 @@ services:
         fromDatabase:
           name: ipl-db
           property: connectionString
-      - key: REDIS_HOST
+      - key: REDIS_URL
         fromService:
           type: redis
           name: ipl-redis
-          property: host
-      - key: REDIS_PORT
-        fromService:
-          type: redis
-          name: ipl-redis
-          property: port
+          property: connectionString
       - key: GROK_API_KEY
         sync: false
       - key: CRICAPI_KEY
