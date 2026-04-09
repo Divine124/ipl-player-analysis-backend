@@ -13,12 +13,12 @@ services:
           property: connectionString
       - key: REDIS_HOST
         fromService:
-          type: keyvalue
+          type: redis
           name: ipl-redis
           property: host
       - key: REDIS_PORT
         fromService:
-          type: keyvalue
+          type: redis
           name: ipl-redis
           property: port
       - key: GROK_API_KEY
@@ -30,11 +30,11 @@ services:
       - key: FRONTEND_URL
         sync: false
 
+  - type: redis
+    name: ipl-redis
+    plan: free
+    ipAllowList: []
+
 databases:
   - name: ipl-db
     plan: free
-
-keyvalue:
-  - name: ipl-redis
-    plan: free
-    ipAllowList: []
