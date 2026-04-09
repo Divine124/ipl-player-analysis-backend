@@ -30,12 +30,12 @@ grok:
   api:
     key: ${GROK_API_KEY}
     url: https://api.x.ai/v1/chat/completions
-    model: grok-beta
+    model: grok-3
 
 cricapi:
   api:
     key: ${CRICAPI_KEY}
-    url: https://api.cricketdata.org/v1
+    base-url: https://api.cricapi.com/v1
 
 management:
   endpoints:
